@@ -3,5 +3,49 @@
 }
 
 body {
-  background-color: azure;
+  background-color: rgb(171, 251, 251);
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  
+}
+
+.main-wrapper {
+  height: 80%;
+  width: 80%;
+  background-color: aqua;
+}
+
+main {
+  height: 90%;
+  width: 90%;
+  background-color: rgb(36, 172, 250)
+}
+
+.game {
+  height: 600px;
+  width: 600px;
+  background-color: black;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.game > div {
+  height: 30px;
+  width: 30px;
+  border: 1px solid rgb(75, 75, 75);
+  /* display: flex; */
+  /* justify-content: center; */
+  
+}
+
+.game > div > img {
+  /* transition-duration: 0.7s; */
+  /* transition-timing-function: linear; */
+}
+
+.pacman {
+  background-image: url("../images/pacman.png");
+  background-repeat: no-repeat;
+  background-size: contain;
 }
