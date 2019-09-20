@@ -33,7 +33,7 @@ main {
 .game > div {
   height: 30px;
   width: 30px;
-  border: 1px solid rgb(75, 75, 75);
+  
   /* display: flex; */
   /* justify-content: center; */
   
@@ -48,4 +48,14 @@ main {
   background-image: url("../images/pacman.png");
   background-repeat: no-repeat;
   background-size: contain;
+}
+
+.wall {
+  background-color: rgb(75, 75, 75);
+  border: 1px solid black;
+}
+
+.pacman-div {
+  height: 100%;
+  width: 100%;
 }
