@@ -39,13 +39,9 @@ main {
   
 }
 
-.game > div > img {
-  /* transition-duration: 0.7s; */
-  /* transition-timing-function: linear; */
-}
 
 .pacman {
-  background-image: url("../images/pacman.png");
+  background-image: url("../images/pacman.gif");
   background-repeat: no-repeat;
   background-size: contain;
 }
@@ -58,4 +54,10 @@ main {
 .pacman-div {
   height: 100%;
   width: 100%;
+}
+
+.red-guy {
+  background-image: url("../images/ghost1.gif");
+  background-repeat: no-repeat;
+  background-size: contain;
 }
