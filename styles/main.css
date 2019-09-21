@@ -28,6 +28,7 @@ main {
   background-color: black;
   display: flex;
   flex-wrap: wrap;
+  color: white;
 }
 
 .game > div {
@@ -57,7 +58,20 @@ main {
 }
 
 .red-guy {
-  background-image: url("../images/ghost1.gif");
+  background-image: url("../images/red-guy.gif");
   background-repeat: no-repeat;
   background-size: contain;
+}
+
+.pinky {
+  background-image: url("../images/pinky.gif");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.death {
+  background-image: url("../images/skeleton.gif");
+  background-repeat: no-repeat;
+  background-size: contain;
+
 }
