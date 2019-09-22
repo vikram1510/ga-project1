@@ -183,11 +183,15 @@ function pacmanMove(nextPosFunc, rotation) {
     return
   }
 
+  if (bufferMove){
+    if (!nextPosIsWall) bufferMove = null
+  }
 
   let transform = 0
   cells[pacmanPos].firstChild.style.transform = rotation + 'translateX(0)'
 
   pacmanMoveId = setInterval(() => {
+
     if (bufferMove){
       // console.log('buffer', bufferMove)
       if (!isNextPosWall(bufferMove.nextPosFunc(pacmanPos))) {
@@ -217,6 +221,7 @@ function pacmanMove(nextPosFunc, rotation) {
         transform = 0
       }
     }
+    
 
   }, 10)
 
