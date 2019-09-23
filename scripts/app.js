@@ -7,6 +7,8 @@ class Ghost {
     this.lastPos = null
     this.moving = true
     this.moveId = null
+    this.class = name
+    this.speed = 200
   }
 
   filterGhostMoves(posArray, move){
@@ -49,18 +51,23 @@ const cells = []
 let lives
 const ghostMoves = ['left','up','right','down']
 const wallArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 29, 30, 39, 40, 42, 43, 44, 45, 46, 47, 49, 50, 52, 53, 54, 55, 56, 57, 59, 60, 62, 63, 64, 65, 66, 67, 69, 70, 72, 73, 74, 75, 76, 77, 79, 80, 82, 83, 84, 85, 86, 87, 89, 90, 92, 93, 94, 95, 96, 97, 99, 100, 119, 120, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 139, 140, 147, 152, 159, 160, 161, 162, 163, 164, 165, 167, 169, 170, 172, 174, 175, 176, 177, 178, 179, 189, 190, 200, 201, 202, 203, 204, 205, 207, 212, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 227, 228, 229, 230, 231, 232, 234, 235, 236, 237, 238, 239, 240, 249, 250, 259, 260, 262, 263, 264, 265, 267, 272, 274, 275, 276, 277, 279, 280, 282, 283, 284, 285, 287, 288, 289, 290, 291, 292, 294, 295, 296, 297, 299, 300, 302, 303, 304, 305, 307, 308, 309, 310, 311, 312, 314, 315, 316, 317, 319, 320, 327, 328, 329, 330, 331, 332, 339, 340, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 359, 360, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399]
+const pillsArray = [41, 58, 321, 338]
+const totalDots = (width ** 2) - wallArray.length - pillsArray.length
+let remainingDots = totalDots
 const initialPacmanPos = 193
 let pacmanPos = initialPacmanPos, pacmanMoveId = null, lastKeyPressed = null
 let pacmanLives = 3
 let collisionChecker = null
 let bufferMove = null
+let powerPillId = null
+
 
 
 const ghostRed = new Ghost('red-guy', 28)
 const ghostPink = new Ghost('pinky', 378)
 const ghostYellow = new Ghost('yellow', 361)
 
-const ghosts = [ghostRed, ghostPink, ghostYellow]
+let ghosts = [ghostRed, ghostPink, ghostYellow]
 
 let stage = 'gamePlay'
 
@@ -87,6 +94,7 @@ function setupPacman() {
     pacmanDiv.classList.add('pacman-div')
 
     if (wallArray.includes(i)) cell.classList.add('wall')
+    else if (pillsArray.includes(i)) cell.classList.add('pill')
     else cell.classList.add('dot')
 
 
@@ -108,9 +116,10 @@ function startPacman() {
 
   document.addEventListener('keyup', (e) => {
 
+    // debug purposes
     if (e.key === 'q') collision()
 
-    if (stage === 'gamePlay'){
+    if (stage === 'gamePlay' || stage === 'powerPill'){
 
       moveGhosts()
 
@@ -150,26 +159,20 @@ function moveGhosts(){
         
         const moveIndex = Math.floor(Math.random() * possibleGhostMoves.length)
 
-        cells[ghost.pos].firstChild.classList.remove(ghost.name)
+        cells[ghost.pos].firstChild.classList.remove(ghost.class)
 
         ghost.pos = possibleGhostMoves[moveIndex]
 
         cells[ghost.pos].firstChild.style.transform = 'rotate(0deg)'
 
-        cells[ghost.pos].firstChild.classList.add(ghost.name)
+        cells[ghost.pos].firstChild.classList.add(ghost.class)
 
-
-        if (pacmanPos === ghost.pos) collision()
-      }, 250)
+        if (pacmanPos === ghost.pos) collision(ghost)
+      }, ghost.speed)
       ghost.moving = false
     }
   })
 
-}
-
-function stopCharacters() {
-  ghosts.forEach(ghost => clearInterval(ghost.moveId))
-  clearInterval(pacmanMoveId)
 }
 
 function pacmanMove(nextPosFunc, rotation) {
@@ -179,7 +182,7 @@ function pacmanMove(nextPosFunc, rotation) {
   if (!nextPosIsWall) clearInterval(pacmanMoveId)
   else {
     bufferMove = { nextPosFunc: nextPosFunc, rotation: rotation }
-    lastKeyPressed = null
+    // lastKeyPressed = null
     return
   }
 
@@ -207,15 +210,27 @@ function pacmanMove(nextPosFunc, rotation) {
     if (!nextPosIsWall){
       if (transform < 75) {
         transform += 5
-        if (ghosts.some(ghost => ghost.pos === nextPosFunc(pacmanPos) ||
-                        ghost.pos === nextPosFunc(pacmanPos))) {
-          collision()
-        }
+
+        ghosts.forEach(ghost => {
+          if (ghost.pos === pacmanPos)  collision(ghost)
+          else if (ghost.pos === nextPosFunc(pacmanPos))  collision(ghost)
+        })
+
         cells[pacmanPos].firstChild.style.transform = rotation + `translateX(${transform}%)`
       } else {
         cells[pacmanPos].firstChild.classList.remove('pacman')
         pacmanPos = nextPosFunc(pacmanPos)
-        if (cells[pacmanPos].classList.contains('dot')) cells[pacmanPos].classList.remove('dot')
+
+        if (cells[pacmanPos].classList.contains('dot')) {
+          cells[pacmanPos].classList.remove('dot')
+          remainingDots--
+          // console.log(remainingDots)
+          if (remainingDots === 0) winGame()
+        } else if (cells[pacmanPos].classList.contains('pill')) {
+          console.log('hello hello')
+          cells[pacmanPos].classList.remove('pill')
+          powerPillMode()
+        }
         cells[pacmanPos].firstChild.classList.add('pacman')
         cells[pacmanPos].firstChild.style.transform = rotation + 'translateX(0)'
         transform = 0
@@ -227,13 +242,63 @@ function pacmanMove(nextPosFunc, rotation) {
 
 }
 
+
+function stopCharacters() {
+  ghosts.forEach(ghost => clearInterval(ghost.moveId))
+  clearInterval(pacmanMoveId)
+}
+
 // function checkCollisions() {
 //   collisionChecker = setInterval(() => {
 //     if (ghosts.some(ghost => ghost.pos === pacmanPos)) collision()
 //   },50)
 // }
 
-function collision() {
+function powerPillMode(){
+  stage = 'powerPill'
+  ghosts.forEach(ghost => {
+    ghost.class = 'weak-ghost'
+    ghost.speed = 250
+    cells[ghost.pos].firstChild.classList.remove(ghost.name)
+  })
+
+  if (powerPillId) clearTimeout(powerPillId)
+
+  powerPillId = setTimeout(() => {
+    ghosts.forEach((ghost) => {
+      cells[ghost.pos].firstChild.classList.remove(ghost.class)
+      ghost.class = ghost.name
+      ghost.speed = 200
+      cells[ghost.pos].firstChild.classList.add(ghost.class)
+    })
+    stage = 'gamePlay'
+  },6000)
+}
+
+function powerPillCollision(deadGhost){
+  // console.log('hello', deadGhost)
+  clearInterval(deadGhost.moveId)
+  cells[deadGhost.pos].firstChild.classList.remove(deadGhost.class)
+  ghosts = ghosts.filter(ghost => ghost !== deadGhost)
+
+  setTimeout(() => {
+    deadGhost.moving = true
+    deadGhost.class = deadGhost.name
+    deadGhost.speed = 200
+    ghosts.push(deadGhost)
+    // console.log(ghosts)
+
+  }, 3000)
+
+}
+
+function collision(ghost) {
+
+  if (stage === 'powerPill') {
+    powerPillCollision(ghost)
+    return
+  }
+
   stage = 'collision'
   pacmanLives--
   lives.removeChild(lives.lastElementChild)
@@ -245,7 +310,7 @@ function collision() {
   setTimeout(() => {
     cells[pacmanPos].firstChild.classList.remove('death')
     ghosts.forEach(ghost => {
-      cells[ghost.pos].firstChild.classList.remove(ghost.name)
+      cells[ghost.pos].firstChild.classList.remove(ghost.class)
       ghost.moving = true
       ghost.pos = ghost.initialpos
     })
@@ -263,10 +328,17 @@ function collision() {
   }, 900)
 }
 
+
+function winGame(){
+  stage = 'winGame'
+  stopCharacters()
+  console.log('you win')
+}
+
 function initialPlacement(){
   cells[initialPacmanPos].firstChild.classList.add('pacman')
   ghosts.forEach(ghost => {
-    cells[ghost.initialpos].firstChild.classList.add(ghost.name)
+    cells[ghost.initialpos].firstChild.classList.add(ghost.class)
   })
 }
 

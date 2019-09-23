@@ -91,6 +91,12 @@ main {
   background-size: contain;
 }
 
+.weak-ghost {
+  background-image: url("../images/weak-ghost.gif");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .death {
   background-image: url("../images/died.gif");
   background-repeat: no-repeat;
@@ -102,4 +108,10 @@ main {
   background-repeat: no-repeat;
   background-size: cover;
 
+}
+
+.pill {
+  background-image: url("../images/powerpill.gif ");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
