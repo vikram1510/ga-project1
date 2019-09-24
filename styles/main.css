@@ -13,14 +13,16 @@ body {
 .main-wrapper {
   height: 100%;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 main {
-  height: 100%;
+  height: 85%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
 }
 
@@ -47,12 +49,24 @@ main {
   color: wheat;
   list-style-type: none;
   display: flex;
-
+  height: 80%;
+  margin: 0;
+  padding: 0;
+  
 }
+
+.stats li {
+  height: 50%;
+  width: 10%;
+}
+
+
 
 .game > div {
   height: 5%;
   width: 5%;
+  font-size: 10px;
+  text-align: center;
 }
 
 
@@ -114,4 +128,16 @@ main {
   background-image: url("../images/powerpill.gif ");
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.ghost-kill{
+  background-image: url("../images/pew.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.pacman-life {
+  background-image: url("../images/pacman.png");
+  background-repeat: no-repeat;
+  background-size: contain;
 }

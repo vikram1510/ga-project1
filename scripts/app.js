@@ -1,14 +1,16 @@
+/* eslint-disable brace-style */
 
 class Ghost {
   constructor(name, initialPos){
     this.name = name
     this.pos = initialPos
-    this.initialpos = initialPos
+    this.initialPos = initialPos
     this.lastPos = null
     this.moving = true
     this.moveId = null
     this.class = name
-    this.speed = 200
+    this.speed = ghostSpeed
+    // this.translateVal = 0
   }
 
   filterGhostMoves(posArray, move){
@@ -39,7 +41,10 @@ class Ghost {
 
     }
 
-    if (!isNextPosWall(nextPos) && nextPos !== this.lastPos) posArray.push(nextPos)
+    if (!isNextPosWall(nextPos) && nextPos !== this.lastPos) {
+      const directionObject = { pos: nextPos, direction: move }
+      posArray.push(directionObject)
+    }
     // console.log(move, nextPos, posArray)
     return posArray
 
@@ -54,18 +59,19 @@ const wallArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 const pillsArray = [41, 58, 321, 338]
 const totalDots = (width ** 2) - wallArray.length - pillsArray.length
 let remainingDots = totalDots
-const initialPacmanPos = 193
+const initialPacmanPos = 109
 let pacmanPos = initialPacmanPos, pacmanMoveId = null, lastKeyPressed = null
 let pacmanLives = 3
-let collisionChecker = null
+const pacmanSpeed = 10
 let bufferMove = null
 let powerPillId = null
+const respawnPos = 149
+const ghostSpeed = 15
+const showNumbers = false
 
-
-
-const ghostRed = new Ghost('red-guy', 28)
-const ghostPink = new Ghost('pinky', 378)
-const ghostYellow = new Ghost('yellow', 361)
+const ghostRed = new Ghost('red-guy', 168)
+const ghostPink = new Ghost('pinky', 150)
+const ghostYellow = new Ghost('yellow', 191)
 
 let ghosts = [ghostRed, ghostPink, ghostYellow]
 
@@ -79,8 +85,6 @@ window.addEventListener('load', () => {
 
   startPacman()
 
-  // checkCollisions()
-
 })
 
 
@@ -92,6 +96,7 @@ function setupPacman() {
     const cell = document.createElement('div')
     const pacmanDiv = document.createElement('div')
     pacmanDiv.classList.add('pacman-div')
+    if (showNumbers) pacmanDiv.textContent = i
 
     if (wallArray.includes(i)) cell.classList.add('wall')
     else if (pillsArray.includes(i)) cell.classList.add('pill')
@@ -103,10 +108,11 @@ function setupPacman() {
     gameGrid.appendChild(cell)
   }
 
+  
   lives = document.querySelector('ul.lives')
   for (let i = 0; i < pacmanLives; i++){
     const lifeLi = document.createElement('li')
-    lifeLi.textContent = 'life' + (i + 1)
+    lifeLi.classList.add('pacman-life')
     lives.appendChild(lifeLi)
   }
 
@@ -139,7 +145,6 @@ function startPacman() {
 
     }
 
-
   })
 
 }
@@ -149,31 +154,58 @@ function moveGhosts(){
 
   ghosts.forEach(ghost => {
     if (ghost.moving) {
-      console.log('moving')
+      ghost.translateVal = 0
+      let possibleGhostMoves, moveIndex, move, translate, moveComplete = true, translateVal = 0
       ghost.moveId = setInterval(() => {
 
-        const possibleGhostMoves = ghostMoves
-          .reduce(ghost.filterGhostMoves.bind(ghost), [])
+        if (moveComplete){
+          possibleGhostMoves = ghostMoves
+            .reduce(ghost.filterGhostMoves.bind(ghost), [])
+          
+          possibleGhostMoves = pickBestMove(possibleGhostMoves, ghost.pos)
         
-        ghost.lastPos = ghost.pos
-        
-        const moveIndex = Math.floor(Math.random() * possibleGhostMoves.length)
+          ghost.lastPos = ghost.pos
+          
+          moveIndex = Math.floor(Math.random() * possibleGhostMoves.length)
+          
+          move = possibleGhostMoves[moveIndex]
 
-        cells[ghost.pos].firstChild.classList.remove(ghost.class)
+          translate = getTranslation(move.direction)
 
-        ghost.pos = possibleGhostMoves[moveIndex]
+          moveComplete = false
+        }
 
-        cells[ghost.pos].firstChild.style.transform = 'rotate(0deg)'
+        // const translate = getTranslation('left')
 
-        cells[ghost.pos].firstChild.classList.add(ghost.class)
+        if (translateVal < 75){
+          if (pacmanPos === ghost.pos) collision(ghost)
+          translateVal += 5
+          const transformString = 'rotate(0deg)' + `${translate.string}(${translate.sign}${translateVal}%)`
+          // console.log(transformString)
+          cells[ghost.pos].firstChild.style.transform = transformString
+        } else {
+          cells[ghost.pos].firstChild.classList.remove(ghost.class)
+          ghost.pos = move.pos
 
-        if (pacmanPos === ghost.pos) collision(ghost)
+          cells[ghost.pos].firstChild.classList.add(ghost.class)
+          cells[ghost.pos].firstChild.style.transform = 'rotate(0deg)' + `${translate.string}(0%)`
+
+
+  
+          if (pacmanPos === ghost.pos) collision(ghost)
+          translateVal = 0
+          moveComplete = true
+
+        }
+
+
       }, ghost.speed)
       ghost.moving = false
     }
   })
 
 }
+
 
 function pacmanMove(nextPosFunc, rotation) {
 
@@ -238,7 +270,7 @@ function pacmanMove(nextPosFunc, rotation) {
     }
     
 
-  }, 10)
+  }, pacmanSpeed)
 
 }
 
@@ -248,18 +280,18 @@ function stopCharacters() {
   clearInterval(pacmanMoveId)
 }
 
-// function checkCollisions() {
-//   collisionChecker = setInterval(() => {
-//     if (ghosts.some(ghost => ghost.pos === pacmanPos)) collision()
-//   },50)
-// }
-
 function powerPillMode(){
   stage = 'powerPill'
   ghosts.forEach(ghost => {
-    ghost.class = 'weak-ghost'
-    ghost.speed = 250
     cells[ghost.pos].firstChild.classList.remove(ghost.name)
+    cells[ghost.pos].firstChild.classList.add('weak-ghost')
+    ghost.class = 'weak-ghost'
+    ghost.lastPos = null
+    clearInterval(ghost.moveId)
+    ghost.speed = 50
+    ghost.moving = true
+    moveGhosts()
+    
   })
 
   if (powerPillId) clearTimeout(powerPillId)
@@ -267,8 +299,13 @@ function powerPillMode(){
   powerPillId = setTimeout(() => {
     ghosts.forEach((ghost) => {
       cells[ghost.pos].firstChild.classList.remove(ghost.class)
+      clearInterval(ghost.moveId)
+      ghost.speed = ghostSpeed
+      ghost.moving = true
       ghost.class = ghost.name
-      ghost.speed = 200
+      ghost.lastPos = null
+      // ghost.pos = respawnPos
+      moveGhosts()
       cells[ghost.pos].firstChild.classList.add(ghost.class)
     })
     stage = 'gamePlay'
@@ -279,12 +316,17 @@ function powerPillCollision(deadGhost){
   // console.log('hello', deadGhost)
   clearInterval(deadGhost.moveId)
   cells[deadGhost.pos].firstChild.classList.remove(deadGhost.class)
+  // cells[deadGhost.pos].nodeValue = 'pew'
+  cells[deadGhost.pos].classList.add('ghost-kill')
+  setTimeout(() => cells[deadGhost.pos].classList.remove('ghost-kill'), 500)
+  // stopCharacters()
   ghosts = ghosts.filter(ghost => ghost !== deadGhost)
 
   setTimeout(() => {
     deadGhost.moving = true
     deadGhost.class = deadGhost.name
-    deadGhost.speed = 200
+    deadGhost.speed = ghostSpeed
+    deadGhost.pos = respawnPos
     ghosts.push(deadGhost)
     // console.log(ghosts)
 
@@ -312,12 +354,11 @@ function collision(ghost) {
     ghosts.forEach(ghost => {
       cells[ghost.pos].firstChild.classList.remove(ghost.class)
       ghost.moving = true
-      ghost.pos = ghost.initialpos
+      ghost.pos = ghost.initialPos
     })
     pacmanPos = initialPacmanPos
     lastKeyPressed = null
     initialPlacement()
-    // checkCollisions()
     if (pacmanLives === 0) {
       stage = 'gameOver'
       console.log('game over')
@@ -338,7 +379,7 @@ function winGame(){
 function initialPlacement(){
   cells[initialPacmanPos].firstChild.classList.add('pacman')
   ghosts.forEach(ghost => {
-    cells[ghost.initialpos].firstChild.classList.add(ghost.class)
+    cells[ghost.initialPos].firstChild.classList.add(ghost.class)
   })
 }
 
@@ -352,7 +393,7 @@ function nextPosRight(characterPos){
 function nextPosLeft(characterPos){
   const nextPos = characterPos - 1
   const xCoord = characterPos % width
-  if (xCoord === 0) return nextPos + width - 1
+  if (xCoord === 0) return nextPos + width
   else return nextPos
 }
 
@@ -367,3 +408,69 @@ function nextPosDown(characterPos){
 function isNextPosWall(nextPos){
   return cells[nextPos].classList.contains('wall')
 }
+
+
+function getTranslation(direction){
+
+  switch (direction) {
+    case 'left':
+      return { string: 'translateX', sign: '-' }
+ 
+    case 'right':
+      return { string: 'translateX', sign: '+' }
+
+    case 'up':
+      return { string: 'translateY', sign: '-' }
+
+    case 'down':
+      return { string: 'translateY', sign: '+' }
+  }
+
+}
+
+function pickBestMove(possibleMoves, currentPos){
+
+  const xPacman = pacmanPos % width
+  const yPacman = Math.floor(pacmanPos / width)
+
+  const xBeforeMove = currentPos % width
+  const yBeforeMove = Math.floor(currentPos / width)
+
+  const xDistanceBefore = Math.abs(xPacman - xBeforeMove)
+  const yDistanceBefore = Math.abs(yPacman - yBeforeMove)
+
+  const bestMoves = possibleMoves.filter(move => {
+
+    const xAfterMove = move.pos % width
+    const yAfterMove = Math.floor(move.pos / width)
+
+    const xDistanceAfter = Math.abs(xPacman - xAfterMove)
+    const yDistanceAfter = Math.abs(yPacman - yAfterMove)
+
+    if (move.direction === 'left' || move.direction === 'right') {
+      if (stage !== 'powerPill'){
+        if (xDistanceAfter < xDistanceBefore) return move
+      } 
+      else {
+        if (xDistanceAfter > xDistanceBefore) return move
+      }
+      
+    } else if (move.direction === 'up' || move.direction === 'down') {
+      if (stage !== 'powerPill'){
+        if (yDistanceAfter < yDistanceBefore) return move
+      } 
+      else {
+        if (yDistanceAfter > yDistanceBefore) return move
+      }
+    }
+
+  })
+
+  if (bestMoves.length > 0){
+    if (bestMoves.length < possibleMoves.length) return bestMoves
+  }
+
+  return possibleMoves
+
+}
+
