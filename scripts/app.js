@@ -10,7 +10,6 @@ class Ghost {
     this.moveId = null
     this.class = name
     this.speed = ghostSpeed
-    // this.translateVal = 0
   }
 
   filterGhostMoves(posArray, move){
@@ -61,13 +60,15 @@ const totalDots = (width ** 2) - wallArray.length - pillsArray.length
 let remainingDots = totalDots
 const initialPacmanPos = 109
 let pacmanPos = initialPacmanPos, pacmanMoveId = null, lastKeyPressed = null
-let pacmanLives = 3
+let pacmanLives = 1
 const pacmanSpeed = 10
 let bufferMove = null
 let powerPillId = null
 const respawnPos = 149
-const ghostSpeed = 15
+const ghostSpeed = 10
 const showNumbers = false
+let score = 0, scoreSpan
+
 
 const ghostRed = new Ghost('red-guy', 168)
 const ghostPink = new Ghost('pinky', 150)
@@ -116,6 +117,8 @@ function setupPacman() {
     lives.appendChild(lifeLi)
   }
 
+  scoreSpan = document.getElementById('score')
+
 }
 
 function startPacman() {
@@ -133,13 +136,13 @@ function startPacman() {
   
         lastKeyPressed = e.keyCode
   
-        if (e.keyCode === 39) pacmanMove(nextPosRight, 'rotate(0deg)')
+        if (e.keyCode === 39 || e.keyCode === 68) pacmanMove(nextPosRight, 'rotate(0deg)')
   
-        else if (e.keyCode === 37) pacmanMove(nextPosLeft, 'rotate(180deg)')
+        else if (e.keyCode === 37 || e.keyCode === 65) pacmanMove(nextPosLeft, 'rotate(180deg)')
   
-        else if (e.keyCode === 38) pacmanMove(nextPosUp, 'rotate(270deg)')
+        else if (e.keyCode === 38 || e.keyCode === 87) pacmanMove(nextPosUp, 'rotate(270deg)')
   
-        else if (e.keyCode === 40) pacmanMove(nextPosDown, 'rotate(90deg)')
+        else if (e.keyCode === 40 || e.keyCode === 83) pacmanMove(nextPosDown, 'rotate(90deg)')
   
       }
 
@@ -256,6 +259,7 @@ function pacmanMove(nextPosFunc, rotation) {
         if (cells[pacmanPos].classList.contains('dot')) {
           cells[pacmanPos].classList.remove('dot')
           remainingDots--
+          updateScore(10)
           // console.log(remainingDots)
           if (remainingDots === 0) winGame()
         } else if (cells[pacmanPos].classList.contains('pill')) {
@@ -313,6 +317,7 @@ function powerPillMode(){
 }
 
 function powerPillCollision(deadGhost){
+  updateScore(100)
   // console.log('hello', deadGhost)
   clearInterval(deadGhost.moveId)
   cells[deadGhost.pos].firstChild.classList.remove(deadGhost.class)
@@ -336,20 +341,39 @@ function powerPillCollision(deadGhost){
 
 function collision(ghost) {
 
+  if (stage === 'collision' || stage === 'gameOver') return
+
   if (stage === 'powerPill') {
-    powerPillCollision(ghost)
+    if (ghost.class === 'weak-ghost'){
+      powerPillCollision(ghost)
+    }
     return
   }
 
   stage = 'collision'
   pacmanLives--
-  lives.removeChild(lives.lastElementChild)
+
+  console.log(pacmanLives)
+
+  lives.children[pacmanLives].classList.remove('pacman-life')
+  // lives.chil.classList.remove('pacman-life')
   // clearInterval(collisionChecker)
-  stopCharacters()
+  
   cells[pacmanPos].firstChild.classList.remove('pacman')
   cells[pacmanPos].firstChild.classList.add('death')
 
+  if (pacmanLives === 0)  {
+    gameOver(ghost)
+    return
+  }
+
+  stopCharacters()
+
+
+
   setTimeout(() => {
+    console.log('hi')
+
     cells[pacmanPos].firstChild.classList.remove('death')
     ghosts.forEach(ghost => {
       cells[ghost.pos].firstChild.classList.remove(ghost.class)
@@ -358,22 +382,48 @@ function collision(ghost) {
     })
     pacmanPos = initialPacmanPos
     lastKeyPressed = null
-    initialPlacement()
+    
     if (pacmanLives === 0) {
-      stage = 'gameOver'
-      console.log('game over')
+      gameOver()
     } else {
+      initialPlacement()
       stage = 'gamePlay'
     }
 
   }, 900)
 }
 
+function gameOver(killerGhost){
+  stage = 'gameOver'
+  clearInterval(pacmanMoveId)
+  clearInterval(killerGhost.moveId)
+  
+  setTimeout(() => {
+    killerGhost.moving = true
+    moveGhosts()
+    
+    cells[pacmanPos].firstChild.classList.remove('death')
+    const gameOverElements = document.querySelectorAll('.game-over')
+    gameOverElements.forEach(element => element.style.display = 'block')
+
+    setTimeout(() => {
+      gameOverElements[0].style.transform = 'translateY(300px)'
+      gameOverElements[1].style.opacity = '0.5'
+    },100)
+
+  }, 900)
+
+}
 
 function winGame(){
   stage = 'winGame'
   stopCharacters()
   console.log('you win')
+}
+
+function updateScore(points){
+  score += points
+  scoreSpan.textContent = score
 }
 
 function initialPlacement(){
@@ -430,6 +480,8 @@ function getTranslation(direction){
 
 function pickBestMove(possibleMoves, currentPos){
 
+  if (stage === 'gameOver') return possibleMoves
+
   const xPacman = pacmanPos % width
   const yPacman = Math.floor(pacmanPos / width)
 
@@ -448,6 +500,7 @@ function pickBestMove(possibleMoves, currentPos){
     const yDistanceAfter = Math.abs(yPacman - yAfterMove)
 
     if (move.direction === 'left' || move.direction === 'right') {
+
       if (stage !== 'powerPill'){
         if (xDistanceAfter < xDistanceBefore) return move
       } 
@@ -456,6 +509,7 @@ function pickBestMove(possibleMoves, currentPos){
       }
       
     } else if (move.direction === 'up' || move.direction === 'down') {
+
       if (stage !== 'powerPill'){
         if (yDistanceAfter < yDistanceBefore) return move
       } 
@@ -465,6 +519,10 @@ function pickBestMove(possibleMoves, currentPos){
     }
 
   })
+
+  // console.log(currentPos)
+  // console.log(bestMoves)
+  // console.log(possibleMoves)
 
   if (bestMoves.length > 0){
     if (bestMoves.length < possibleMoves.length) return bestMoves

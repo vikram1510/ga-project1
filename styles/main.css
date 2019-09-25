@@ -7,6 +7,48 @@ body {
   width: 100vw;
   height: 100vh;
   margin: 0;
+  font-family: monospace;
+  
+  
+}
+
+.game-over.overlay {
+  opacity: 0;
+  background-color: grey;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: none;
+  transition: 3s;
+  
+}
+
+.game-over.text{
+  font-size: 50px;
+  position: absolute;
+  top: 0;
+  margin: 0;
+  color: white;
+  transform: translateY(-60px);
+  display: none;
+  transition: 15s ease;
+}
+
+.hide {
+  display: none;
+}
+
+.unhide {
+  display: block;
+}
+
+.fade-in {
+  opacity: 0.5;
+  
+}
+
+.slow-text {
+  transform: translateY(300px);
   
 }
 
@@ -42,6 +84,9 @@ main {
   max-height: 50px;
   width: 100%;
   flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  color: antiquewhite;
   /* background-color: wheat; */
 }
 
@@ -52,12 +97,20 @@ main {
   height: 80%;
   margin: 0;
   padding: 0;
+  width: 20%;
+  align-content : center;
   
 }
 
 .stats li {
-  height: 50%;
-  width: 10%;
+  height: 80%;
+  flex-grow: 1;
+}
+
+.stats p{
+  
+  font-size: 20px;
+  margin: 0;
 }
 
 
