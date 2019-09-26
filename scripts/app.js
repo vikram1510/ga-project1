@@ -51,29 +51,32 @@ class Ghost {
 
 }
 
-// class Level {
-//   constructor(level, dotArray, pillsArray){
-//     this.level = level
-//     this.dotArray = dotArray
-//     this.pillsArray = pillsArray
-//   }
-// }
+class Level {
+  constructor(level, dotArray, pillsArray, characterPositions){
+    this.level = level
+    this.dotArray = dotArray
+    this.pillsArray = pillsArray
+    this.remainingDots = dotArray.length
+    this.characterPositions = characterPositions
+  }
+}
 
 const initialPacmanPos = 30
-const pacman = { pos: initialPacmanPos, lives: 1, moveId: null, speed: 10 }
+const pacman = { pos: initialPacmanPos, lives: 3, moveId: null, speed: 10 }
 
 const width = 20
-const cells = []
+let cells = []
 let lives
 const ghostMoves = ['left','up','right','down']
-// const level = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 29, 30, 39, 40, 42, 43, 44, 45, 46, 47, 49, 50, 52, 53, 54, 55, 56, 57, 59, 60, 62, 63, 64, 65, 66, 67, 69, 70, 72, 73, 74, 75, 76, 77, 79, 80, 82, 83, 84, 85, 86, 87, 89, 90, 92, 93, 94, 95, 96, 97, 99, 100, 119, 120, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 139, 140, 147, 152, 159, 160, 161, 162, 163, 164, 165, 167, 169, 170, 172, 174, 175, 176, 177, 178, 179, 189, 190, 200, 201, 202, 203, 204, 205, 207, 212, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 227, 228, 229, 230, 231, 232, 234, 235, 236, 237, 238, 239, 240, 249, 250, 259, 260, 262, 263, 264, 265, 267, 272, 274, 275, 276, 277, 279, 280, 282, 283, 284, 285, 287, 288, 289, 290, 291, 292, 294, 295, 296, 297, 299, 300, 302, 303, 304, 305, 307, 308, 309, 310, 311, 312, 314, 315, 316, 317, 319, 320, 327, 328, 329, 330, 331, 332, 339, 340, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 359, 360, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399]
-const level = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
-// const levelArray2 = [21, 41, 61, 81, 101, 121, 141, 142, 143, 144, 145, 146, 166, 186, 180, 181, 182, 183, 184, 185, 187, 188, 168, 148, 149, 150, 151, 171, 191, 211, 210, 209, 208, 192, 193, 194, 195, 196, 197, 198, 199, 173, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 88, 68, 48, 28, 27, 26, 25, 24, 23, 22, 91, 71, 51, 31, 32, 33, 34, 35, 36, 37, 206, 226, 246, 266, 286, 306, 326, 325, 324, 323, 322, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 258, 278, 298, 318, 338, 358, 253, 254, 255, 256, 257, 213, 233, 273, 293, 313, 333, 334, 335, 336, 337, 241, 261, 281, 301, 242, 243, 244, 245, 247, 248, 268, 269, 270, 271, 251, 252]
+const level1Dots = [21, 41, 61, 81, 101, 121, 141, 142, 143, 144, 145, 146, 166, 186, 180, 181, 182, 183, 184, 185, 187, 188, 168, 148, 149, 150, 151, 171, 191, 211, 210, 209, 208, 192, 193, 194, 195, 196, 197, 198, 199, 173, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 88, 68, 48, 28, 27, 26, 25, 24, 23, 22, 91, 71, 51, 31, 32, 33, 34, 35, 36, 37, 206, 226, 246, 266, 286, 306, 326, 325, 324, 323, 322, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 258, 278, 298, 318, 338, 358, 253, 254, 255, 256, 257, 213, 233, 273, 293, 313, 333, 334, 335, 336, 337, 241, 261, 281, 301, 242, 243, 244, 245, 247, 248, 268, 269, 270, 271, 251, 252]
+const level2Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
 
+const level1Pills = [41, 58, 321, 338]
+const level1  = new Level(1, level1Dots, level1Pills, {})
+const level2  = new Level(2, level2Dots, [])
 
-const pillsArray = [41, 58, 321, 338]
-const totalDots = level.length - 4
-let remainingDots = totalDots
+const levels = [level2]
+let currentLevel = 1
 
 let lastKeyPressed = null, bufferMove = null, powerPillId = null
 
@@ -99,7 +102,7 @@ window.addEventListener('load', () => {
   
   if (gameMode){
 
-    setupPacman()
+    setupPacman(levels[currentLevel - 1])
 
     initialPlacement()
   
@@ -119,9 +122,11 @@ window.addEventListener('load', () => {
 })
 
 
-function setupPacman() {
+function setupPacman(level) {
   // Setup PacMan
   const gameGrid = document.querySelector('.game')
+
+  if (cells.length !== 0) cells = []
 
   for (let i = 0; i < width ** 2; i++) {
     const cell = document.createElement('div')
@@ -130,8 +135,8 @@ function setupPacman() {
     if (showNumbers) pacmanDiv.textContent = i
 
     if (gameMode){
-      if (level.includes(i)) cell.classList.add('dot')
-      else if (pillsArray.includes(i)) cell.classList.add('pill')
+      if (level.dotArray.includes(i)) cell.classList.add('dot')
+      else if (level.pillsArray.includes(i)) cell.classList.add('pill')
       else cell.classList.add('wall')
     }
     else cell.classList.add('wall')
@@ -142,15 +147,16 @@ function setupPacman() {
     gameGrid.appendChild(cell)
   }
 
+  if (currentLevel === 1){
+    lives = document.querySelector('ul.lives')
+    for (let i = 0; i < pacman.lives; i++){
+      const lifeLi = document.createElement('li')
+      lifeLi.classList.add('pacman-life')
+      lives.appendChild(lifeLi)
+    }
   
-  lives = document.querySelector('ul.lives')
-  for (let i = 0; i < pacman.lives; i++){
-    const lifeLi = document.createElement('li')
-    lifeLi.classList.add('pacman-life')
-    lives.appendChild(lifeLi)
+    scoreSpan = document.getElementById('score')
   }
-
-  scoreSpan = document.getElementById('score')
 
 }
 
@@ -297,10 +303,10 @@ function pacmanMove(nextPosFunc, rotation) {
 
         if (cells[pacman.pos].classList.contains('dot')) {
           cells[pacman.pos].classList.remove('dot')
-          remainingDots--
+          levels[currentLevel - 1].remainingDots--
           updateScore(10)
           // console.log(remainingDots)
-          if (remainingDots === 0) winGame()
+          if (levels[currentLevel - 1].remainingDots === 0) winGame()
         } else if (cells[pacman.pos].classList.contains('pill')) {
           console.log('hello hello')
           cells[pacman.pos].classList.remove('pill')
@@ -675,7 +681,7 @@ function pickBestMove(possibleMoves, currentPos){
 
 function levelEditor() {
   let select = false
-  let array = new Set()
+  const array = new Set()
   const cells = document.querySelectorAll('.game .pacman-div')
 
   cells.forEach(cell => {
