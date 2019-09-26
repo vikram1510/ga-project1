@@ -1,10 +1,10 @@
 /* eslint-disable brace-style */
 
 class Ghost {
-  constructor(name, initialPos){
+  constructor(name){
     this.name = name
-    this.pos = initialPos
-    this.initialPos = initialPos
+    this.pos = null
+    this.initialPos = null
     this.lastPos = null
     this.moving = true
     this.moveId = null
@@ -56,26 +56,31 @@ class Level {
     this.level = level
     this.dotArray = dotArray
     this.pillsArray = pillsArray
-    this.remainingDots = dotArray.length
-    this.characterPositions = characterPositions
+    this.remainingDots = dotArray.length - pillsArray.length
+    // this.remainingDots = 15
+    this.initialPos = characterPositions
   }
 }
 
-const initialPacmanPos = 30
-const pacman = { pos: initialPacmanPos, lives: 3, moveId: null, speed: 10 }
+let initialPacmanPos = 30
+const pacmanInitialLives = 1
+const pacman = { pos: initialPacmanPos, lives: pacmanInitialLives, moveId: null, speed: 10 }
 
 const width = 20
 let cells = []
 let lives
 const ghostMoves = ['left','up','right','down']
+
 const level1Dots = [21, 41, 61, 81, 101, 121, 141, 142, 143, 144, 145, 146, 166, 186, 180, 181, 182, 183, 184, 185, 187, 188, 168, 148, 149, 150, 151, 171, 191, 211, 210, 209, 208, 192, 193, 194, 195, 196, 197, 198, 199, 173, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 88, 68, 48, 28, 27, 26, 25, 24, 23, 22, 91, 71, 51, 31, 32, 33, 34, 35, 36, 37, 206, 226, 246, 266, 286, 306, 326, 325, 324, 323, 322, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 258, 278, 298, 318, 338, 358, 253, 254, 255, 256, 257, 213, 233, 273, 293, 313, 333, 334, 335, 336, 337, 241, 261, 281, 301, 242, 243, 244, 245, 247, 248, 268, 269, 270, 271, 251, 252]
+
 const level2Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
 
 const level1Pills = [41, 58, 321, 338]
-const level1  = new Level(1, level1Dots, level1Pills, {})
-const level2  = new Level(2, level2Dots, [])
+const level2Pills = [305, 313, 210, 107]
+const level1  = new Level(1, level1Dots, level1Pills, { pacman: 109, ghosts: [148, 149, 150] })
+const level2  = new Level(2, level2Dots, level2Pills, { pacman: 30, ghosts: [67, 72, 375] })
 
-const levels = [level2]
+const levels = [level1, level2]
 let currentLevel = 1
 
 let lastKeyPressed = null, bufferMove = null, powerPillId = null
@@ -87,9 +92,9 @@ let score = 0, scoreSpan
 const difficulties = ['easy', 'medium', 'hard']
 let difficulty = 'medium'
 
-const ghostRed = new Ghost('red-guy', 67)
-const ghostPink = new Ghost('pinky', 72)
-const ghostYellow = new Ghost('yellow', 375)
+const ghostRed = new Ghost('red-guy')
+const ghostPink = new Ghost('pinky')
+const ghostYellow = new Ghost('yellow')
 let ghosts = [ghostRed, ghostPink, ghostYellow]
 
 let stage = 'gameStart Menu'
@@ -98,12 +103,16 @@ let startMenuOption = 'playGame'
 
 const gameMode = true
 
+let overlay
+
 window.addEventListener('load', () => {
   
   if (gameMode){
 
-    setupPacman(levels[currentLevel - 1])
+    setupPacman(level1)
 
+    setCharacterPositions(level1)
+    
     initialPlacement()
   
     startPacman()
@@ -125,8 +134,9 @@ window.addEventListener('load', () => {
 function setupPacman(level) {
   // Setup PacMan
   const gameGrid = document.querySelector('.game')
-
-  if (cells.length !== 0) cells = []
+  gameGrid.innerHTML = ''
+  cells = []
+  document.getElementById('levelLabel').innerHTML = 'Level ' + level.level
 
   for (let i = 0; i < width ** 2; i++) {
     const cell = document.createElement('div')
@@ -135,19 +145,20 @@ function setupPacman(level) {
     if (showNumbers) pacmanDiv.textContent = i
 
     if (gameMode){
-      if (level.dotArray.includes(i)) cell.classList.add('dot')
-      else if (level.pillsArray.includes(i)) cell.classList.add('pill')
+      if (level.pillsArray.includes(i)) cell.classList.add('pill')
+      else if (level.dotArray.includes(i)) cell.classList.add('dot')
       else cell.classList.add('wall')
     }
     else cell.classList.add('wall')
 
-
+    cell.style.transition = '1s'
     cell.appendChild(pacmanDiv)
     cells.push(cell)
     gameGrid.appendChild(cell)
   }
 
   if (currentLevel === 1){
+    if (lives) lives.innerHTML = ''
     lives = document.querySelector('ul.lives')
     for (let i = 0; i < pacman.lives; i++){
       const lifeLi = document.createElement('li')
@@ -163,17 +174,25 @@ function setupPacman(level) {
 function startPacman() {
 
   document.addEventListener('keyup', (e) => {
-    console.log('startPacman')
+    e.preventDefault()
+
+    console.log('startPacman', stage)
     // debug purposes
     if (e.key === 'q') collision()
 
     if (stage.includes('gameStart')) {
-
+      console.log('gamestart')
       gameStart(e.keyCode)
 
     }
 
-    if (stage === 'gamePlay' || stage === 'powerPill'){
+    else if (stage === 'newGame') {
+      if (e.keyCode === 80){
+        newGame()
+      }
+    }
+
+    else if (stage === 'gamePlay' || stage === 'powerPill'){
 
       moveGhosts()
 
@@ -306,7 +325,7 @@ function pacmanMove(nextPosFunc, rotation) {
           levels[currentLevel - 1].remainingDots--
           updateScore(10)
           // console.log(remainingDots)
-          if (levels[currentLevel - 1].remainingDots === 0) winGame()
+          if (levels[currentLevel - 1].remainingDots === 0) winLevel()
         } else if (cells[pacman.pos].classList.contains('pill')) {
           console.log('hello hello')
           cells[pacman.pos].classList.remove('pill')
@@ -321,6 +340,15 @@ function pacmanMove(nextPosFunc, rotation) {
 
   }, pacman.speed)
 
+}
+
+function setCharacterPositions(level){
+  initialPacmanPos = level.initialPos.pacman
+  pacman.pos = initialPacmanPos
+  ghosts.forEach((ghost, index) => {
+    ghost.initialPos = level.initialPos.ghosts[index]
+    ghost.pos = ghost.initialPos
+  })
 }
 
 function setDifficulty() {
@@ -407,7 +435,9 @@ function powerPillCollision(deadGhost){
 
 function collision(ghost) {
 
-  if (stage === 'collision' || stage === 'gameOver') return
+  if (stage === 'collision') return
+
+  if (stage !== 'gamePlay' && stage !== 'powerPill') return
 
   if (stage === 'powerPill') {
     if (ghost.class === 'weak-ghost'){
@@ -475,6 +505,10 @@ function gameOver(killerGhost){
     setTimeout(() => {
       gameOverElements[0].style.transform = 'translateY(300px)'
       gameOverElements[1].style.opacity = '0.5'
+      stage = 'newGame'
+      setTimeout(() => {
+        document.querySelector('.game-over-msg').style.display = 'block'
+      },14000)
     },100)
 
   }, 900)
@@ -483,10 +517,11 @@ function gameOver(killerGhost){
 
 function gameStart(keyCode){
   const selectors = document.querySelectorAll('.start-menu li > span')
-  const startMenu = document.querySelector('.start-menu')
+  overlay = document.querySelector('.start-menu')
   const box = document.querySelector('.start-menu .box')
   const selectOptions = document.querySelector('.select-option')
   const difficultyMenu = document.querySelector('.difficulty')
+  
 
   // selectors.forEach(s => console.log(s))
   if (stage.includes('Menu')) {
@@ -536,14 +571,18 @@ function gameStart(keyCode){
   if (keyCode === 13){
     
     if (startMenuOption === 'playGame') {
-      setTimeout(() => 
-        selectors[0].style.transform = 'translateY(-2000px)',200) 
       setTimeout(() => {
-        // Array.from(box.children).forEach(element => element.style.display = 'none')
-        selectOptions.style.display = 'none'
-        box.style.backgroundColor = 'rgb(0, 0, 0, 0)'
-        stage = 'gamePlay'
-      }, 1000)
+        selectors[0].style.transform = 'translateY(-2000px)'
+        setTimeout(() => {
+          box.style.opacity = '0'
+          setTimeout(() => {
+            box.style.display = 'none'
+            box.style.opacity = '1'
+            selectors[0].style.transform = ''
+            levelTransition(1)
+          }, 750)
+        }, 1000)
+      }, 200)
 
       setDifficulty()
 
@@ -564,11 +603,97 @@ function gameStart(keyCode){
 
 }
 
-function winGame(){
-  stage = 'nextLevel'
+function newGame(){
+  // const selectOptions = document.querySelector('.select-option')
+  const gameOverElements = document.querySelectorAll('.game-over')
+  document.querySelector('.game-over-msg').style.display = 'none'
+  gameOverElements.forEach(element => element.style.display = 'none')
+  gameOverElements[0].style.transform = ''
+  gameOverElements[1].style.opacity = '0'
 
+  const winningScreen = document.querySelector('.winning')
+  const box = document.querySelector('.start-menu .box')
+  const startMenu = document.querySelector('.start-menu')
+  startMenu.style.display = 'flex'
+  winningScreen.style.display = 'none'
+  box.style.display = 'flex'
+  cells[pacman.pos].style.transform = ''
+  currentLevel = 1
+  pacman.lives = pacmanInitialLives
   stopCharacters()
-  console.log('you win')
+  setupPacman(level1)
+  setCharacterPositions(level1)
+  initialPlacement()
+  lastKeyPressed = null
+  stage = 'gameStart Menu'
+  ghosts.forEach(ghost => ghost.moving = true)
+  levels.forEach((level) => level.remainingDots = level.dotArray - level.pillsArray)
+}
+
+function winLevel(){
+  stage = 'nextLevel'
+  currentLevel++
+  const level =  levels[currentLevel - 1]
+  stopCharacters()
+  setTimeout(() => {
+    cells[pacman.pos].style.transform = 'translateY(-750px)'
+    if (currentLevel <= levels.length) {
+      setTimeout(() => {
+        cells[pacman.pos].style.transform = ''
+        setupPacman(level)
+        setCharacterPositions(level)
+        initialPlacement()
+        levelTransition(level.level)
+        ghosts.forEach(ghost => ghost.moving = true)
+        stage = 'gamePlay'
+        lastKeyPressed = null
+      }, 2000)
+    } else {
+      winGame()
+    }
+  }, 1000)
+  
+}
+
+function winGame(){
+  overlay.style.display = 'flex'
+  const winningScreen = document.querySelector('.winning')
+  winningScreen.style.display = 'flex'
+  setTimeout(() => {
+    winningScreen.style.opacity = '1'
+  },1000)
+  stage = 'newGame'
+}
+
+function levelTransition(levelNumber){
+
+  overlay.style.display = 'flex'
+  const box = document.querySelector('.start-menu .box')
+  const stageTransition = document.querySelector('.stage-transition')
+  const stageh2 = document.querySelector('.stage-transition h2')
+
+  stageh2.textContent = `Level ${levelNumber}`
+  box.style.display = 'none'
+  stageTransition.classList.remove('hide')
+  
+
+  setTimeout(() => {
+    stageTransition.style.opacity = 1
+    setTimeout(() => {
+      stageTransition.classList.add('stage-animation')
+      setTimeout(() => {
+        stageTransition.classList.remove('stage-animation')
+        stageTransition.classList.add('hide')
+        stageTransition.style.opacity = 0
+        overlay.style.display = 'none'
+        stage = 'gamePlay'
+      }, 500)
+    }, 1500)
+  }, 100)
+
+
+
+
 }
 
 function updateScore(points){

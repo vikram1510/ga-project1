@@ -12,6 +12,35 @@ body {
   
 }
 
+.winning {
+  background-color: rgba(0, 0, 0, 1);
+  height: 20%;
+  width: 600px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transition: 2s ease-in;
+  display: none;
+  /* justify-content:  */
+}
+
+.winning h2 {
+  /* margin-top: 15px; */
+  margin:0;
+  font-size: 60px;
+  
+  /* text-align: center; */
+}
+
+.winning p {
+  margin:0;
+  font-size: 20px;
+}
+
+
+
 .start-menu {
   /* background-color: black; */
   position: absolute;
@@ -21,6 +50,38 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.stage-transition {
+  background-color: rgba(0, 0, 0, 0.8);
+  height: 10%;
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  opacity: 0;
+  transition: 1s ease-in;
+}
+
+.stage-animation{
+  transform: translateX(1000px);
+}
+
+.stage-transition .pacman-gif img {
+  height: 100%;
+  width: auto;
+}
+
+.stage-transition .pacman-gif{
+  height: 50%;
+  width: 25%
+}
+
+.stage-transition h2{
+  /* flex: 2; */
+  font-size: 40px;
+
 }
 
 .start-menu .box{
@@ -35,7 +96,7 @@ body {
   justify-content: space-evenly;
   align-items: center;
   transition: 1s;
-
+  /* display: none; */
 }
 
 .start-menu .select-option{
@@ -53,13 +114,6 @@ body {
   height: 100%;
   width: 100%;
   display: none;
-  /* align-content: center; */
-  /* display: none; */
-  /* background-color: aliceblue; */
-  /* display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center; */
 }
 
 .start-menu .banner {
@@ -143,6 +197,12 @@ body {
   transform: translateY(-60px);
   display: none;
   transition: 15s ease;
+  text-align: center;
+}
+
+.game-over-msg {
+  font-size: 20px;
+  display: none;
 }
 
 .hide {
@@ -185,7 +245,7 @@ main {
   background-color: black;
   display: flex;
   flex-wrap: wrap;
-  color: white;
+  color: rgb(65, 40, 40);
   width: 100%;
   flex-grow: 1;
 }
@@ -198,6 +258,7 @@ main {
   display: flex;
   justify-content: space-between;
   color: antiquewhite;
+  margin-top: 10px;
   /* background-color: wheat; */
 }
 

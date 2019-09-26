@@ -14,6 +14,16 @@
   <div class="main-wrapper">
     <main>
       <div class="start-menu">
+        <div class="winning">
+          <h2 class="you-win">YOU WIN</h2>
+          <p>Press 'P' start again</p>
+        </div>
+        <div class="stage-transition hide">
+          <div class="pacman-gif">
+            <img src="images/pacman.gif" alt="">
+          </div>
+          <h2 id="level">Stage 1</h2>
+        </div>
         <div class="box">
           <div class="select-option">
             <div class="banner">
@@ -40,10 +50,13 @@
               <li>Hard</li>
             </ul>
           </div>
-
         </div>
       </div>
-      <p class="game-over text">GAME OVER</p>
+      <div class="game-over text">
+        <p>GAME OVER</p>
+        <p class="game-over-msg">Press 'P' to start again</p>
+      </div>
+
       <div class="game-over overlay">
       </div>
 
@@ -58,6 +71,7 @@
           <li>life2</li>
           <li>life3</li> -->
         </ul>
+        <p id="levelLabel"></p>
         <p>Score: <span id="score">0</span></p>
       </div>
 
