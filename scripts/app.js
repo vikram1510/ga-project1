@@ -57,7 +57,7 @@ class Level {
     this.dotArray = dotArray
     this.pillsArray = pillsArray
     this.remainingDots = dotArray.length - pillsArray.length
-    this.remainingDots = 15
+    // this.remainingDots = 15
     this.initialPos = characterPositions
   }
 }
@@ -181,6 +181,12 @@ function startPacman() {
     console.log('startPacman', stage)
     // debug purposes
     if (e.key === 'q') collision()
+    if (e.keyCode === 32){
+      startMusic()
+    }
+    else if (e.keyCode === 78){
+      getNextAudio()
+    }
 
     if (stage.includes('gameStart')) {
       // console.log('gamestart')
@@ -211,6 +217,8 @@ function startPacman() {
         else if (e.keyCode === 40 || e.keyCode === 83) pacmanMove(nextPosDown, 'rotate(90deg)')
   
       }
+
+
 
     }
 
@@ -326,11 +334,11 @@ function pacmanMove(nextPosFunc, rotation) {
           cells[pacman.pos].classList.remove('dot')
           levels[currentLevel - 1].remainingDots--
           updateScore(10)
-
+          
           // console.log(levels[currentLevel - 1].remainingDots)
           if (levels[currentLevel - 1].remainingDots === 0) winLevel()
         } else if (cells[pacman.pos].classList.contains('pill')) {
-          console.log('hello hello')
+          new Audio('music/pacman_eatfruit.wav').play()
           cells[pacman.pos].classList.remove('pill')
           powerPillMode()
         }
@@ -414,6 +422,7 @@ function powerPillMode(){
 }
 
 function powerPillCollision(deadGhost){
+  new Audio('music/pacman_eatghost.wav').play()
   updateScore(100)
   // console.log('hello', deadGhost)
   clearInterval(deadGhost.moveId)
@@ -441,6 +450,8 @@ function collision(ghost) {
   if (stage === 'collision') return
 
   if (stage !== 'gamePlay' && stage !== 'powerPill') return
+
+  new Audio('music/pacman_death.wav').play()
 
   if (stage === 'powerPill') {
     if (ghost.class === 'weak-ghost'){
@@ -471,7 +482,6 @@ function collision(ghost) {
 
 
   setTimeout(() => {
-    // console.log('hi')
 
     cells[pacman.pos].firstChild.classList.remove('death')
     ghosts.forEach(ghost => {
@@ -840,4 +850,53 @@ function levelEditor() {
     if (e.key === 'q') console.log(String(Array.from(array)))
   })
 
+}
+
+let audioPlaying = false
+const audioFiles = ['dreams', 'theme', 'tranquility']
+let audioIndex = Math.floor(Math.random() * audioFiles.length)
+const currentAudio = new Audio('music/' + audioFiles[audioIndex] + '.mp3')
+
+let firstSong = true
+
+function startMusic() {
+
+  if (firstSong) {
+    musicAnimation(audioFiles[audioIndex] + '.mp3')
+    firstSong = false
+  }
+
+  currentAudio.addEventListener('ended', () => {
+    getNextAudio()
+  })   
+
+  if (!audioPlaying){
+    currentAudio.play()
+    audioPlaying = true
+  }
+  else {
+    currentAudio.pause()
+    audioPlaying = false
+  }
+}
+
+function getNextAudio(){
+  audioIndex += 1
+  if (audioIndex > audioFiles.length - 1) audioIndex = 0
+  const songName = audioFiles[audioIndex] + '.mp3'
+  currentAudio.src = 'music/' + songName
+  currentAudio.currrentTime = 0
+  currentAudio.play()
+  audioPlaying = true
+  musicAnimation(songName)
+}
+
+function musicAnimation(songName) {
+  const musicDiv = document.querySelector('.music')
+  const musicLabel = document.querySelector('#music')
+  musicDiv.style.opacity = 0.8
+  musicLabel.textContent = songName
+  setTimeout(() => {
+    musicDiv.style.opacity = 0
+  }, 3000)
 }

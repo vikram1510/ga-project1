@@ -250,6 +250,23 @@ main {
   flex-grow: 1;
 }
 
+
+.music {
+  max-width: 600px;
+  max-height: 40px;
+  width: 100%;
+  flex-grow: 1;
+  color: wheat;
+  background-color: rgb(75, 75, 75, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 15px;
+  border-radius: 10px;
+  transition: 1s;
+  opacity: 0;
+}
 .stats {
   max-width: 600px;
   max-height: 50px;
@@ -292,6 +309,7 @@ main {
   width: 5%;
   font-size: 10px;
   text-align: center;
+  /* margin-top: 10px; */
 }
 
 
