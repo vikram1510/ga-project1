@@ -62,50 +62,60 @@ class Level {
   }
 }
 
+//Declare Pacman
 let initialPacmanPos
 const pacmanInitialLives = 5
 const pacman = { pos: initialPacmanPos, lives: pacmanInitialLives, moveId: null, speed: 10 }
 
 const width = 20
 let cells = []
-let lives
+let livesUl
 const ghostMoves = ['left','up','right','down']
 
+//This array describes the positions of all the dots in the grid
 const level1Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
-const level2Dots = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 152, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 25, 24, 23, 22, 21, 41, 61, 81, 101, 121, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 206, 205, 204, 203, 202, 184, 164, 195, 175, 168, 188, 151, 171, 191, 207, 228, 248, 268, 288, 308, 328, 348, 351, 331, 311, 291, 271, 251, 231, 131, 111, 91, 71, 51, 48, 68, 88, 108, 128, 26, 46, 66, 86, 106, 105, 104, 103, 83, 63, 53, 73, 93, 113, 114, 115, 116, 96, 76, 257, 256, 255, 254, 253, 273, 293, 313, 333, 353, 355, 335, 315, 316, 317, 304, 324, 344, 303, 302, 242, 243, 244, 245, 246, 266, 286, 306, 326, 346, 240, 259, 119, 100]
+const level2Dots = [56, 43, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 152, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 25, 24, 23, 22, 21, 41, 61, 81, 101, 121, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 206, 205, 204, 203, 202, 184, 164, 195, 175, 168, 188, 151, 171, 191, 207, 228, 248, 268, 288, 308, 328, 348, 351, 331, 311, 291, 271, 251, 231, 131, 111, 91, 71, 51, 48, 68, 88, 108, 128, 26, 46, 66, 86, 106, 105, 104, 103, 83, 63, 53, 73, 93, 113, 114, 115, 116, 96, 76, 257, 256, 255, 254, 253, 273, 293, 313, 333, 353, 355, 335, 315, 316, 317, 304, 324, 344, 303, 302, 242, 243, 244, 245, 246, 266, 286, 306, 326, 346, 240, 259, 119, 100]
 
 const level1Pills = [305, 313, 210, 107]
 
 const level1  = new Level(1, level1Dots, level1Pills, { pacman: 30, ghosts: [67, 72, 375] })
 const level2  = new Level(2, level2Dots, [304, 315, 142, 157], { pacman: 369, ghosts: [148, 149, 150] })
 
+// all levels stored in array
 const levels = [level1, level2]
 let currentLevel = 1
 
 let lastKeyPressed = null, bufferMove = null, powerPillId = null
 
+// debug flag to show grid numbers
+const showNumbers = true
+
 let ghostSpeed = 15
-const showNumbers = false
 let score = 0, scoreSpan
+
+// Difficulty level stored in local storage
 const difficulties = ['easy', 'medium', 'hard']
 let difficulty = localStorage.getItem('difficulty')
 if (!difficulty) difficulty = 'medium'
 
+// Declare Ghosts
 const ghostRed = new Ghost('red-guy')
 const ghostPink = new Ghost('pinky')
 const ghostYellow = new Ghost('yellow')
 let ghosts = [ghostRed, ghostPink, ghostYellow]
 
+// This stage variable is changed throughout the game (e.g. gamePlay, gameOver etc.)
 let stage = 'gameStart Menu'
 
-let startMenuOption = 'playGame'
-
+// switch to false for level editor for dev purposes
 const gameMode = true
 
+// variable to store dom element
 let overlay
 
 let mute = false
 
+// This is where it all starts
 window.addEventListener('load', () => {
   
   if (gameMode){
@@ -116,7 +126,7 @@ window.addEventListener('load', () => {
     
     initialPlacement()
   
-    startPacman()
+    setupControls()
 
   } else {
     
@@ -131,9 +141,8 @@ window.addEventListener('load', () => {
 
 })
 
-
+// This function sets up the given level; entire grid, location of dots, walls etc. and initialises the Lives too
 function setupPacman(level) {
-  // Setup PacMan
   const gameGrid = document.querySelector('.game')
   gameGrid.innerHTML = ''
   cells = []
@@ -159,12 +168,12 @@ function setupPacman(level) {
   }
 
   if (currentLevel === 1){
-    if (lives) lives.innerHTML = ''
-    lives = document.querySelector('ul.lives')
+    if (livesUl) livesUl.innerHTML = ''
+    livesUl = document.querySelector('ul.lives')
     for (let i = 0; i < pacman.lives; i++){
       const lifeLi = document.createElement('li')
       lifeLi.classList.add('pacman-life')
-      lives.appendChild(lifeLi)
+      livesUl.appendChild(lifeLi)
     }
   
     scoreSpan = document.getElementById('score')
@@ -172,22 +181,28 @@ function setupPacman(level) {
 
 }
 
-function startPacman() {
+// Here is the event listener for all arrow key controls at different stages of the game
+// using the stage variable
+// if stage is gamePlay, then arrow keys are used to control Pacman
+// if stage is gameStart then arrow keys are used to navigate the start Menu etc.
+// Music controls are available at all stages of the game
+function setupControls() {
 
   document.addEventListener('keyup', (e) => {
     e.preventDefault()
+    console.log(stage)
 
-    console.log('startPacman', stage)
     // debug purposes
     if (e.key === 'q') collision()
-    if (e.keyCode === 32){
-      startMusic()
-    }
-    else if (e.keyCode === 78){
-      nextSong()
-    }
+
+    // spacebar for music (start/pause/play)
+    if (e.keyCode === 32) controlMusic()
+
+    // 'N' for next song
+    else if (e.keyCode === 78) nextSong()
+
+    // 'M' for toggling mute switch for sound effects
     else if (e.keyCode === 77){
-      // mute = true
       if (mute) {
         mute = false
         musicAnimation('Sound Effects ON')
@@ -195,27 +210,22 @@ function startPacman() {
         mute = true
         musicAnimation('Sound Effects OFF')
       }
-      
     }
 
+    if (stage.includes('gameStart')) gameStart(e.keyCode)
 
-    if (stage.includes('gameStart')) {
-      // console.log('gamestart')
-      gameStart(e.keyCode)
-
-    }
-
+    // 'P' to start new game if stage is newGame
     else if (stage === 'newGame') {
-      if (e.keyCode === 80){
-        newGame()
-        // location.reload()
-      }
+      if (e.keyCode === 80) newGame()
     }
 
+    // Actual GamePlay, arrow keys or WSAD to move pacman
     else if (stage === 'gamePlay' || stage === 'powerPill'){
 
+      // Initial ghost movement is triggered by Pacman
       moveGhosts()
 
+      // Can't press the same key twice in a row
       if (lastKeyPressed !== e.keyCode) {
   
         lastKeyPressed = e.keyCode
@@ -229,8 +239,6 @@ function startPacman() {
         else if (e.keyCode === 40 || e.keyCode === 83) pacmanMove(nextPosDown, 'rotate(90deg)')
   
       }
-
-
 
     }
 
@@ -250,13 +258,15 @@ function moveGhosts(){
         if (moveComplete){
           possibleGhostMoves = ghostMoves
             .reduce(ghost.filterGhostMoves.bind(ghost), [])
-          
+
+          // console.log('before', ghost, possibleGhostMoves)
           possibleGhostMoves = pickBestMove(possibleGhostMoves, ghost.pos)
         
           ghost.lastPos = ghost.pos
           
           moveIndex = Math.floor(Math.random() * possibleGhostMoves.length)
           
+          // console.log('after', ghost, possibleGhostMoves)
           move = possibleGhostMoves[moveIndex]
 
           translate = getTranslation(move.direction)
@@ -264,13 +274,10 @@ function moveGhosts(){
           moveComplete = false
         }
 
-        // const translate = getTranslation('left')
-
         if (translateVal < 75){
           if (pacman.pos === ghost.pos) collision(ghost)
           translateVal += 5
           const transformString = 'rotate(0deg)' + `${translate.string}(${translate.sign}${translateVal}%)`
-          // console.log(transformString)
           cells[ghost.pos].firstChild.style.transform = transformString
         } else {
           cells[ghost.pos].firstChild.classList.remove(ghost.class)
@@ -278,15 +285,11 @@ function moveGhosts(){
 
           cells[ghost.pos].firstChild.classList.add(ghost.class)
           cells[ghost.pos].firstChild.style.transform = 'rotate(0deg)' + `${translate.string}(0%)`
-
-
   
           if (pacman.pos === ghost.pos) collision(ghost)
           translateVal = 0
           moveComplete = true
-
         }
-
 
       }, ghost.speed)
       ghost.moving = false
@@ -477,8 +480,8 @@ function collision(ghost) {
 
   // console.log(pacman.lives)
 
-  lives.children[pacman.lives].classList.remove('pacman-life')
-  // lives.chil.classList.remove('pacman-life')
+  livesUl.children[pacman.lives].classList.remove('pacman-life')
+  // livesUl.chil.classList.remove('pacman-life')
   // clearInterval(collisionChecker)
   
   cells[pacman.pos].firstChild.classList.remove('pacman')
@@ -539,6 +542,8 @@ function gameOver(killerGhost){
   }, 900)
 
 }
+
+let startMenuOption = 'playGame'
 
 function gameStart(keyCode){
   const selectors = document.querySelectorAll('.start-menu li > span')
@@ -874,7 +879,7 @@ const currentAudio = new Audio('music/' + audioFiles[audioIndex] + '.mp3')
 currentAudio.addEventListener('ended', nextSong)
 
 
-function startMusic() {
+function controlMusic() {
 
   musicAnimation(audioFiles[audioIndex] + '.mp3')
 
