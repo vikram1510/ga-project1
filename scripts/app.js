@@ -63,7 +63,7 @@ class Level {
 }
 
 let initialPacmanPos
-const pacmanInitialLives = 3
+const pacmanInitialLives = 5
 const pacman = { pos: initialPacmanPos, lives: pacmanInitialLives, moveId: null, speed: 10 }
 
 const width = 20
@@ -71,28 +71,25 @@ let cells = []
 let lives
 const ghostMoves = ['left','up','right','down']
 
-const level1Dots = [21, 41, 61, 81, 101, 121, 141, 142, 143, 144, 145, 146, 166, 186, 180, 181, 182, 183, 184, 185, 187, 188, 168, 148, 149, 150, 151, 171, 191, 211, 210, 209, 208, 192, 193, 194, 195, 196, 197, 198, 199, 173, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 117, 116, 115, 114, 113, 112, 111, 110, 109, 108, 107, 106, 105, 104, 103, 102, 88, 68, 48, 28, 27, 26, 25, 24, 23, 22, 91, 71, 51, 31, 32, 33, 34, 35, 36, 37, 206, 226, 246, 266, 286, 306, 326, 325, 324, 323, 322, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 258, 278, 298, 318, 338, 358, 253, 254, 255, 256, 257, 213, 233, 273, 293, 313, 333, 334, 335, 336, 337, 241, 261, 281, 301, 242, 243, 244, 245, 247, 248, 268, 269, 270, 271, 251, 252]
-const level2Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
-const level3Dots = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 152, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 25, 24, 23, 22, 21, 41, 61, 81, 101, 121, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 206, 205, 204, 203, 202, 184, 164, 195, 175, 168, 188, 151, 171, 191, 207, 228, 248, 268, 288, 308, 328, 348, 351, 331, 311, 291, 271, 251, 231, 131, 111, 91, 71, 51, 48, 68, 88, 108, 128, 26, 46, 66, 86, 106, 105, 104, 103, 83, 63, 53, 73, 93, 113, 114, 115, 116, 96, 76, 257, 256, 255, 254, 253, 273, 293, 313, 333, 353, 355, 335, 315, 316, 317, 304, 324, 344, 303, 302, 242, 243, 244, 245, 246, 266, 286, 306, 326, 346, 240, 259, 119, 100]
+const level1Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
+const level2Dots = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 152, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 25, 24, 23, 22, 21, 41, 61, 81, 101, 121, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 206, 205, 204, 203, 202, 184, 164, 195, 175, 168, 188, 151, 171, 191, 207, 228, 248, 268, 288, 308, 328, 348, 351, 331, 311, 291, 271, 251, 231, 131, 111, 91, 71, 51, 48, 68, 88, 108, 128, 26, 46, 66, 86, 106, 105, 104, 103, 83, 63, 53, 73, 93, 113, 114, 115, 116, 96, 76, 257, 256, 255, 254, 253, 273, 293, 313, 333, 353, 355, 335, 315, 316, 317, 304, 324, 344, 303, 302, 242, 243, 244, 245, 246, 266, 286, 306, 326, 346, 240, 259, 119, 100]
 
-const level1Pills = [41, 58, 321, 338]
-const level2Pills = [305, 313, 210, 107]
+const level1Pills = [305, 313, 210, 107]
 
-const level1  = new Level(1, level1Dots, level1Pills, { pacman: 109, ghosts: [148, 149, 150] })
-const level2  = new Level(2, level2Dots, level2Pills, { pacman: 30, ghosts: [67, 72, 375] })
-const level3  = new Level(3, level3Dots, [304, 315, 142, 157], { pacman: 369, ghosts: [148, 149, 150] })
+const level1  = new Level(1, level1Dots, level1Pills, { pacman: 30, ghosts: [67, 72, 375] })
+const level2  = new Level(2, level2Dots, [304, 315, 142, 157], { pacman: 369, ghosts: [148, 149, 150] })
 
-const levels = [level1, level2, level3]
+const levels = [level1, level2]
 let currentLevel = 1
 
 let lastKeyPressed = null, bufferMove = null, powerPillId = null
 
-const respawnPos = 149
 let ghostSpeed = 15
 const showNumbers = false
 let score = 0, scoreSpan
 const difficulties = ['easy', 'medium', 'hard']
-let difficulty = 'medium'
+let difficulty = localStorage.getItem('difficulty')
+if (!difficulty) difficulty = 'medium'
 
 const ghostRed = new Ghost('red-guy')
 const ghostPink = new Ghost('pinky')
@@ -106,6 +103,8 @@ let startMenuOption = 'playGame'
 const gameMode = true
 
 let overlay
+
+let mute = false
 
 window.addEventListener('load', () => {
   
@@ -185,8 +184,20 @@ function startPacman() {
       startMusic()
     }
     else if (e.keyCode === 78){
-      getNextAudio()
+      nextSong()
     }
+    else if (e.keyCode === 77){
+      // mute = true
+      if (mute) {
+        mute = false
+        musicAnimation('Sound Effects ON')
+      } else {
+        mute = true
+        musicAnimation('Sound Effects OFF')
+      }
+      
+    }
+
 
     if (stage.includes('gameStart')) {
       // console.log('gamestart')
@@ -197,6 +208,7 @@ function startPacman() {
     else if (stage === 'newGame') {
       if (e.keyCode === 80){
         newGame()
+        // location.reload()
       }
     }
 
@@ -338,7 +350,7 @@ function pacmanMove(nextPosFunc, rotation) {
           // console.log(levels[currentLevel - 1].remainingDots)
           if (levels[currentLevel - 1].remainingDots === 0) winLevel()
         } else if (cells[pacman.pos].classList.contains('pill')) {
-          new Audio('music/pacman_eatfruit.wav').play()
+          if (!mute) new Audio('music/pacman_eatfruit.wav').play()
           cells[pacman.pos].classList.remove('pill')
           powerPillMode()
         }
@@ -422,7 +434,7 @@ function powerPillMode(){
 }
 
 function powerPillCollision(deadGhost){
-  new Audio('music/pacman_eatghost.wav').play()
+  if (!mute) new Audio('music/pacman_eatghost.wav').play()
   updateScore(100)
   // console.log('hello', deadGhost)
   clearInterval(deadGhost.moveId)
@@ -437,7 +449,7 @@ function powerPillCollision(deadGhost){
     deadGhost.moving = true
     deadGhost.class = deadGhost.name
     deadGhost.speed = ghostSpeed
-    deadGhost.pos = respawnPos
+    deadGhost.pos = deadGhost.initialPos
     ghosts.push(deadGhost)
     // console.log(ghosts)
 
@@ -451,7 +463,7 @@ function collision(ghost) {
 
   if (stage !== 'gamePlay' && stage !== 'powerPill') return
 
-  new Audio('music/pacman_death.wav').play()
+  if (!mute) new Audio('music/pacman_death.wav').play()
 
   if (stage === 'powerPill') {
     if (ghost.class === 'weak-ghost'){
@@ -463,7 +475,7 @@ function collision(ghost) {
   stage = 'collision'
   pacman.lives--
 
-  console.log(pacman.lives)
+  // console.log(pacman.lives)
 
   lives.children[pacman.lives].classList.remove('pacman-life')
   // lives.chil.classList.remove('pacman-life')
@@ -534,6 +546,7 @@ function gameStart(keyCode){
   const box = document.querySelector('.start-menu .box')
   const selectOptions = document.querySelector('.select-option')
   const difficultyMenu = document.querySelector('.difficulty')
+  const difficultyOptions = document.querySelectorAll('.difficulty li')
   
 
   // selectors.forEach(s => console.log(s))
@@ -554,7 +567,7 @@ function gameStart(keyCode){
   else if (stage.includes('Difficulty')) {
     if (keyCode === 37) {
 
-      const difficultyOptions = document.querySelectorAll('.difficulty li')
+      
       let difficultyIndex = difficulties.indexOf(difficulty)
       difficultyOptions[difficultyIndex].classList.remove('selected')
 
@@ -562,6 +575,7 @@ function gameStart(keyCode){
       else difficultyIndex -= 1
 
       difficulty = difficulties[difficultyIndex]
+      localStorage.setItem('difficulty', difficulty)
       difficultyOptions[difficultyIndex].classList.add('selected')
 
     }
@@ -576,6 +590,7 @@ function gameStart(keyCode){
       else difficultyIndex += 1
 
       difficulty = difficulties[difficultyIndex]
+      localStorage.setItem('difficulty', difficulty)
       difficultyOptions[difficultyIndex].classList.add('selected')
 
     }
@@ -601,7 +616,7 @@ function gameStart(keyCode){
 
     }
     else if (startMenuOption === 'chooseDifficulty' && stage.includes('Menu')){
-      console.log('hi')
+      difficultyOptions[difficulties.indexOf(difficulty)].classList.add('selected')
       stage = 'gameStart Difficulty'
       selectOptions.style.display = 'none'
       difficultyMenu.style.display = 'flex'
@@ -856,19 +871,12 @@ let audioPlaying = false
 const audioFiles = ['dreams', 'theme', 'tranquility']
 let audioIndex = Math.floor(Math.random() * audioFiles.length)
 const currentAudio = new Audio('music/' + audioFiles[audioIndex] + '.mp3')
+currentAudio.addEventListener('ended', nextSong)
 
-let firstSong = true
 
 function startMusic() {
 
-  if (firstSong) {
-    musicAnimation(audioFiles[audioIndex] + '.mp3')
-    firstSong = false
-  }
-
-  currentAudio.addEventListener('ended', () => {
-    getNextAudio()
-  })   
+  musicAnimation(audioFiles[audioIndex] + '.mp3')
 
   if (!audioPlaying){
     currentAudio.play()
@@ -888,15 +896,21 @@ function getNextAudio(){
   currentAudio.currrentTime = 0
   currentAudio.play()
   audioPlaying = true
-  musicAnimation(songName)
 }
+
+let musicAnimationId
 
 function musicAnimation(songName) {
   const musicDiv = document.querySelector('.music')
   const musicLabel = document.querySelector('#music')
   musicDiv.style.opacity = 0.8
   musicLabel.textContent = songName
-  setTimeout(() => {
-    musicDiv.style.opacity = 0
-  }, 3000)
+
+  clearTimeout(musicAnimationId)
+  musicAnimationId = setTimeout(() => musicDiv.style.opacity = 0, 3000)
+}
+
+function nextSong(){
+  getNextAudio()
+  musicAnimation(audioFiles[audioIndex] + '.mp3')
 }
