@@ -72,13 +72,11 @@ let cells = []
 let livesUl
 const ghostMoves = ['left','up','right','down']
 
-//This array describes the positions of all the dots in the grid
+//This array describes the positions of all the dots in the grid (can be generated using level editor)
 const level1Dots = [21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 158, 138, 118, 98, 78, 58, 38, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 43, 63, 83, 103, 123, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 159, 142, 140, 56, 76, 96, 116, 136, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 66, 67, 68, 71, 72, 73, 106, 107, 108, 111, 112, 113, 344, 324, 304, 305, 306, 307, 327, 347, 355, 335, 315, 314, 313, 312, 332, 352, 262, 263, 264, 244, 224, 225, 226, 227, 247, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 253, 233, 213, 193, 173, 206, 186, 166, 217, 216, 215, 214, 170, 190, 210, 230, 250]
 const level2Dots = [56, 43, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 152, 153, 154, 155, 156, 157, 158, 138, 118, 98, 78, 58, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 25, 24, 23, 22, 21, 41, 61, 81, 101, 121, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 358, 338, 318, 298, 278, 258, 238, 218, 198, 178, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 206, 205, 204, 203, 202, 184, 164, 195, 175, 168, 188, 151, 171, 191, 207, 228, 248, 268, 288, 308, 328, 348, 351, 331, 311, 291, 271, 251, 231, 131, 111, 91, 71, 51, 48, 68, 88, 108, 128, 26, 46, 66, 86, 106, 105, 104, 103, 83, 63, 53, 73, 93, 113, 114, 115, 116, 96, 76, 257, 256, 255, 254, 253, 273, 293, 313, 333, 353, 355, 335, 315, 316, 317, 304, 324, 344, 303, 302, 242, 243, 244, 245, 246, 266, 286, 306, 326, 346, 240, 259, 119, 100]
 
-const level1Pills = [305, 313, 210, 107]
-
-const level1  = new Level(1, level1Dots, level1Pills, { pacman: 30, ghosts: [67, 72, 375] })
+const level1  = new Level(1, level1Dots, [305, 313, 210, 107], { pacman: 30, ghosts: [67, 72, 375] })
 const level2  = new Level(2, level2Dots, [304, 315, 142, 157], { pacman: 369, ghosts: [148, 149, 150] })
 
 // all levels stored in array
@@ -88,7 +86,7 @@ let currentLevel = 1
 let lastKeyPressed = null, bufferMove = null, powerPillId = null
 
 // debug flag to show grid numbers
-const showNumbers = true
+const showNumbers = false
 
 let ghostSpeed = 15
 let score = 0, scoreSpan
@@ -246,27 +244,31 @@ function setupControls() {
 
 }
 
-
+// this function cycles through the ghosts array and sets their movement interval at the given ghost speed
 function moveGhosts(){
 
   ghosts.forEach(ghost => {
+
+    // if ghosts are already moving then dont set another interval (when ghost.moving = false)
     if (ghost.moving) {
+
       ghost.translateVal = 0
       let possibleGhostMoves, moveIndex, move, translate, moveComplete = true, translateVal = 0
+
       ghost.moveId = setInterval(() => {
 
+        // get the next move if move is complete
         if (moveComplete){
+
           possibleGhostMoves = ghostMoves
             .reduce(ghost.filterGhostMoves.bind(ghost), [])
 
-          // console.log('before', ghost, possibleGhostMoves)
           possibleGhostMoves = pickBestMove(possibleGhostMoves, ghost.pos)
         
           ghost.lastPos = ghost.pos
           
           moveIndex = Math.floor(Math.random() * possibleGhostMoves.length)
           
-          // console.log('after', ghost, possibleGhostMoves)
           move = possibleGhostMoves[moveIndex]
 
           translate = getTranslation(move.direction)
@@ -274,6 +276,9 @@ function moveGhosts(){
           moveComplete = false
         }
 
+        // using transform translation for smooth movement across the gird
+        // if the ghost has translated 75% into the next cell then move is considered complete
+        // the translate value is incremented by 5% everytime
         if (translateVal < 75){
           if (pacman.pos === ghost.pos) collision(ghost)
           translateVal += 5
@@ -298,15 +303,16 @@ function moveGhosts(){
 
 }
 
-
+// The movement of pacman is similar to ghost, pacman is required to rotate at every turn
+// nextPosFunc is a function which takes pacman current pos as input and outputs the next pos
+// bufferMove allows the player to press the arrow key early and pacman will move when that move is available
 function pacmanMove(nextPosFunc, rotation) {
 
   const nextPosIsWall = isNextPosWall(nextPosFunc(pacman.pos))
-  // console.log(nextPosIsWall)
+  
   if (!nextPosIsWall) clearInterval(pacman.moveId)
   else {
     bufferMove = { nextPosFunc: nextPosFunc, rotation: rotation }
-    // lastKeyPressed = null
     return
   }
 
@@ -320,16 +326,14 @@ function pacmanMove(nextPosFunc, rotation) {
   pacman.moveId = setInterval(() => {
 
     if (bufferMove){
-      // console.log('buffer', bufferMove)
       if (!isNextPosWall(bufferMove.nextPosFunc(pacman.pos))) {
         nextPosFunc = bufferMove.nextPosFunc
         rotation = bufferMove.rotation
         bufferMove = null
       }
     }
-    // console.log(nextPosFunc, rotation)
 
-    const nextPosIsWall = cells[nextPosFunc(pacman.pos)].classList.contains('wall')
+    const nextPosIsWall = isNextPosWall(nextPosFunc(pacman.pos))
 
     if (!nextPosIsWall){
       if (transform < 75) {
@@ -350,7 +354,6 @@ function pacmanMove(nextPosFunc, rotation) {
           levels[currentLevel - 1].remainingDots--
           updateScore(10)
           
-          // console.log(levels[currentLevel - 1].remainingDots)
           if (levels[currentLevel - 1].remainingDots === 0) winLevel()
         } else if (cells[pacman.pos].classList.contains('pill')) {
           if (!mute) new Audio('music/pacman_eatfruit.wav').play()
@@ -404,6 +407,8 @@ function stopCharacters() {
   clearInterval(pacman.moveId)
 }
 
+// in Power Pill mode all ghosts turn blue, weak and slow
+// Power pill mode lasts 6 seconds, then stage is changed back to gamePlay in the timeOut
 function powerPillMode(){
   stage = 'powerPill'
   ghosts.forEach(ghost => {
@@ -415,11 +420,10 @@ function powerPillMode(){
     ghost.speed = 50
     ghost.moving = true
     moveGhosts()
-    
   })
 
   if (powerPillId) clearTimeout(powerPillId)
-
+  
   powerPillId = setTimeout(() => {
     ghosts.forEach((ghost) => {
       cells[ghost.pos].firstChild.classList.remove(ghost.class)
@@ -428,7 +432,6 @@ function powerPillMode(){
       ghost.moving = true
       ghost.class = ghost.name
       ghost.lastPos = null
-      // ghost.pos = respawnPos
       moveGhosts()
       cells[ghost.pos].firstChild.classList.add(ghost.class)
     })
@@ -436,26 +439,25 @@ function powerPillMode(){
   },6000)
 }
 
+// if a collision happens  in powerPill mode, pacman eats ghosts
 function powerPillCollision(deadGhost){
   if (!mute) new Audio('music/pacman_eatghost.wav').play()
   updateScore(100)
-  // console.log('hello', deadGhost)
+
+  // stop dead ghost and show the pacman points animation (+100)
   clearInterval(deadGhost.moveId)
   cells[deadGhost.pos].firstChild.classList.remove(deadGhost.class)
-  // cells[deadGhost.pos].nodeValue = 'pew'
   cells[deadGhost.pos].classList.add('ghost-kill')
   setTimeout(() => cells[deadGhost.pos].classList.remove('ghost-kill'), 500)
-  // stopCharacters()
   ghosts = ghosts.filter(ghost => ghost !== deadGhost)
 
+  // reset the dead ghost after 3 seconds
   setTimeout(() => {
     deadGhost.moving = true
     deadGhost.class = deadGhost.name
     deadGhost.speed = ghostSpeed
     deadGhost.pos = deadGhost.initialPos
     ghosts.push(deadGhost)
-    // console.log(ghosts)
-
   }, 3000)
 
 }
@@ -468,21 +470,15 @@ function collision(ghost) {
 
   if (!mute) new Audio('music/pacman_death.wav').play()
 
-  if (stage === 'powerPill') {
-    if (ghost.class === 'weak-ghost'){
-      powerPillCollision(ghost)
-    }
+  if (stage === 'powerPill' && ghost.class === 'weak-ghost') {
+    powerPillCollision(ghost)
     return
   }
 
   stage = 'collision'
   pacman.lives--
 
-  // console.log(pacman.lives)
-
   livesUl.children[pacman.lives].classList.remove('pacman-life')
-  // livesUl.chil.classList.remove('pacman-life')
-  // clearInterval(collisionChecker)
   
   cells[pacman.pos].firstChild.classList.remove('pacman')
   cells[pacman.pos].firstChild.classList.add('death')
@@ -493,8 +489,6 @@ function collision(ghost) {
   }
 
   stopCharacters()
-
-
 
   setTimeout(() => {
 
@@ -553,8 +547,6 @@ function gameStart(keyCode){
   const difficultyMenu = document.querySelector('.difficulty')
   const difficultyOptions = document.querySelectorAll('.difficulty li')
   
-
-  // selectors.forEach(s => console.log(s))
   if (stage.includes('Menu')) {
     if (keyCode === 38) {
       selectors[0].classList.add('selector')
@@ -636,16 +628,14 @@ function gameStart(keyCode){
 
 }
 
+// set up a new game
 function newGame(){
-  // const selectOptions = document.querySelector('.select-option')
   const gameOverElements = document.querySelectorAll('.game-over')
   const gameOverMsg = document.querySelector('.game-over-msg')
   gameOverMsg.style.display = 'none'
-  // console.log(gameOverMsg)
   gameOverElements.forEach(element => element.style.display = 'none')
   gameOverElements[0].style.transform = ''
   gameOverElements[1].style.opacity = '0'
-
   const winningScreen = document.querySelector('.winning')
   const box = document.querySelector('.start-menu .box')
   const startMenu = document.querySelector('.start-menu')
